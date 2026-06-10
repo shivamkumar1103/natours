@@ -2,11 +2,12 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const sanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
+const mongoSanitize = require('@exortek/express-mongo-sanitize');
 const hpp = require('hpp');
+const sanitizeObject = require('./utils/sanitizeObject');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 
@@ -17,11 +18,19 @@ app.set('query parser', 'extended');
 // set security HTTP headers
 app.use(helmet());
 
+// Body parser, reading data from body into req.body
+app.use(express.json({ limit: '10kb' }));
+
 // Data sanitization against NoSQL query injection
-app.use(sanitize());
+app.use(mongoSanitize());
 
 // Data sanitization against XSS
-app.use(xss());
+app.use((req, res, next) => {
+  if (req.body) {
+    sanitizeObject(req.body);
+  }
+  next();
+});
 
 // Prevent parameter pollution
 app.use(
@@ -49,8 +58,6 @@ app.use('/api', limiter);
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-// Body parser, reading data from body into req.body
-app.use(express.json({ limit: '10kb' }));
 
 // serve static files
 app.use(express.static(`${__dirname}/public`));
@@ -64,7 +71,9 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
+// 404 handler
 app.use((req, res, next) => {
   const err = new AppError(
     `Can't find ${req.originalUrl} on this server!`,
