@@ -22,31 +22,53 @@ const handleValidationErrorDB = (err) => {
   return new AppError(message, 400);
 };
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    err: err,
-    message: err.message,
-    stack: err.stack,
-  });
-};
-
-const sendErrorProd = (err, res) => {
-  // Operational,trusted errors: send error to client
-  if (err.isOperational) {
+const sendErrorDev = (err, req, res) => {
+  // A) API
+  if (req.originalUrl.startsWith('/api')) {
     res.status(err.statusCode).json({
       status: err.status,
+      err: err,
       message: err.message,
+      stack: err.stack,
     });
   }
-  // Programming or other unknown errors: don't leak error details
+  // B) RENDERED WEBSITE
   else {
-    console.error(err);
-    res.status(500).json({
+    res.status(err.statusCode).render('error', {
+      title: 'Something went wrong!',
+      msg: err.message,
+    });
+  }
+};
+
+const sendErrorProd = (err, req, res) => {
+  // A) API
+  if (req.originalUrl.startsWith('/api')) {
+    // Operational,trusted errors: send error to client
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    }
+    // Programming or other unknown errors: don't leak error details
+    return res.status(500).json({
       status: 'error',
       message: 'Something went wrong!',
     });
   }
+  // B) RENDERED WEBSITE
+  if (err.isOperational) {
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong!',
+      msg: err.message,
+    });
+  }
+  // Programming or other unknown errors: don't leak error details
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong!',
+    msg: err.message,
+  });
 };
 
 module.exports = (err, req, res, next) => {
@@ -54,7 +76,7 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else {
     let error = err;
     if (error.name === 'CastError') error = handleCastErrorDB(error);
@@ -64,6 +86,6 @@ module.exports = (err, req, res, next) => {
     else if (error.name === 'JsonWebTokenError') error = handleJWTError();
     else if (error.name === 'TokenExpiredError')
       error = handleJWTExpiredError();
-    sendErrorProd(error, res);
+    sendErrorProd(error, req, res);
   }
 };
