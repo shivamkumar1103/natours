@@ -1,5 +1,8 @@
 node_modules
+.parcel-cache
+dev-data
 
 .eslintrc.json
 config.env
 .prettierrc
+

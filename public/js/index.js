@@ -2,6 +2,7 @@
 import { login, logout } from './login.js';
 import { displayMap } from './mapbox.js';
 import { updateSettings } from './updateSettings.js';
+import { bookTour } from './stripe.js';
 
 // DOM ELEMENTS
 const loginForm = document.querySelector('.form--login');
@@ -9,6 +10,7 @@ const logoutBtn = document.querySelector('.nav__el--logout');
 const mapBox = document.getElementById('map');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
+const bookBtn = document.getElementById('book-tour');
 
 // DELEGATION
 
@@ -33,9 +35,11 @@ if (logoutBtn) {
 if (userDataForm) {
   userDataForm.addEventListener('submit', function (e) {
     e.preventDefault();
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    updateSettings({ name, email }, 'data');
+    const form = new FormData();
+    form.append('photo', document.getElementById('photo').files[0]);
+    form.append('name', document.getElementById('name').value);
+    form.append('email', document.getElementById('email').value);
+    updateSettings(form, 'data');
   });
 }
 
@@ -55,5 +59,14 @@ if (userPasswordForm) {
     document.getElementById('password-current').value = '';
     document.getElementById('password').value = '';
     document.getElementById('password-confirm').value = '';
+  });
+}
+
+if (bookBtn) {
+  bookBtn.addEventListener('click', async function (e) {
+    e.preventDefault();
+    e.target.textContent = 'Processing...';
+    const tourId = this.dataset.tourId;
+    await bookTour(tourId);
   });
 }

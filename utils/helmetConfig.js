@@ -21,7 +21,7 @@ const helmetConfig = helmet({
         'https://*.cloudflare.com',
         "'unsafe-inline'",
       ],
-      frameSrc: ["'self'"],
+      frameSrc: ["'self'", 'https://js.stripe.com'],
       objectSrc: ["'none'"],
       styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
       workerSrc: ["'self'", 'data:', 'blob:'],
