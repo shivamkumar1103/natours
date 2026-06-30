@@ -12,7 +12,6 @@ export const updateSettings = async (data, type) => {
     if (res.data.status === 'success') {
       showAlert('success', 'Data updated successfully!');
       window.setTimeout(() => {
-        console.log('Reloading...');
         location.reload();
       }, 1500);
     }

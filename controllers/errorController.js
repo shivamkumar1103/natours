@@ -23,7 +23,6 @@ const handleValidationErrorDB = (err) => {
 };
 
 const sendErrorDev = (err, req, res) => {
-  console.log(req.originalUrl);
   // A) API
   if (req.originalUrl.startsWith('/api')) {
     res.status(err.statusCode).json({
@@ -53,6 +52,7 @@ const sendErrorProd = (err, req, res) => {
       });
     }
     // Programming or other unknown errors: don't leak error details
+    console.error('ERROR 💥', err);
     return res.status(500).json({
       status: 'error',
       message: 'Something went wrong!',
@@ -66,6 +66,7 @@ const sendErrorProd = (err, req, res) => {
     });
   }
   // Programming or other unknown errors: don't leak error details
+  console.error('ERROR 💥', err);
   return res.status(err.statusCode).render('error', {
     title: 'Something went wrong!',
     msg: 'Please try again later.',

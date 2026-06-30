@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('@exortek/express-mongo-sanitize');
 const hpp = require('hpp');
+const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const helmetConfig = require('./utils/helmetConfig');
 const sanitizeObject = require('./utils/sanitizeObject');
@@ -69,6 +70,9 @@ app.use('/api', limiter);
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+// Compress response data
+app.use(compression());
 
 // Test middleware
 app.use((req, res, next) => {

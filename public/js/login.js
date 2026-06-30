@@ -34,6 +34,7 @@ export async function logout() {
     if (res.data.status === 'success') {
       showAlert('success', 'Logged out successfully!');
       location.reload(true);
+      window.location.assign('/');
     }
   } catch (err) {
     showAlert('error', 'Error logging out! Try again.');

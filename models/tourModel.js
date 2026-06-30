@@ -141,9 +141,9 @@ tourSchema.pre(/^find/, function () {
   });
 });
 
-tourSchema.post(/^find/, function () {
-  console.log(`Query took ${Date.now() - this.start} milliseconds!`);
-});
+// tourSchema.post(/^find/, function () {
+//   console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+// });
 
 // AGGREGATION MIDDLEWARE
 // this point to the current aggregation object, so we can chain pipeline() method to it
