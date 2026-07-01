@@ -21,6 +21,7 @@ const app = express();
 app.set('query parser', 'extended');
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
+app.set('trust proxy', 1);
 // Middleware
 
 // serve static files
